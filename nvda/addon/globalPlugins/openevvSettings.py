@@ -19,7 +19,7 @@ from synthDrivers import _openevv as engine
 def currentSynth():
 	synth = synthDriverHandler.getSynth()
 	if not synth or synth.name != "openevv":
-		raise ValueError("Bitte zuerst OpenEVV als Sprachausgabe auswählen.")
+		raise ValueError("Select OpenEVV as the speech synthesizer first.")
 	return synth
 
 
@@ -68,7 +68,7 @@ class ToolDialog(wx.Dialog):
 	def guarded(self, action):
 		try:
 			if globalVars.appArgs.secure:
-				raise ValueError("Diese Werkzeuge sind auf sicheren Bildschirmen deaktiviert.")
+				raise ValueError("These tools are disabled on secure screens.")
 			action()
 		except Exception as error:
 			showError(self, error)
@@ -76,34 +76,34 @@ class ToolDialog(wx.Dialog):
 
 class DictionaryDialog(ToolDialog):
 	def __init__(self, parent):
-		super().__init__(parent, "OpenEVV – eigene Wörterbucheinträge")
+		super().__init__(parent, "OpenEVV – custom dictionary entries")
 		synth = currentSynth()
 		self.languages = [lang for lang in synth._engine.languages if lang in dictionaries.PREFIXES]
-		self.language = self.body.addLabeledControl("&Sprache:", wx.Choice,
+		self.language = self.body.addLabeledControl("&Language:", wx.Choice,
 			choices=[engine.nameOf(lang) for lang in self.languages])
 		self.language.SetSelection(self.languages.index(synth._language) if synth._language in self.languages else 0)
-		self.volume = self.body.addLabeledControl("Wörterbuch&typ:", wx.Choice,
-			choices=["Ganze Wörter", "Wortstämme", "Abkürzungen"])
+		self.volume = self.body.addLabeledControl("Dictionary &type:", wx.Choice,
+			choices=["Whole words", "Word stems", "Abbreviations"])
 		self.volume.SetSelection(0)
-		self.search = self.body.addLabeledControl("Su&chen:", wx.TextCtrl)
-		self.list = self.body.addLabeledControl("&Einträge:", wx.ListCtrl,
+		self.search = self.body.addLabeledControl("Sea&rch:", wx.TextCtrl)
+		self.list = self.body.addLabeledControl("&Entries:", wx.ListCtrl,
 			style=wx.LC_REPORT | wx.LC_SINGLE_SEL, size=(620, 180))
-		self.list.InsertColumn(0, "Wort", width=210)
-		self.list.InsertColumn(1, "Aussprache", width=380)
-		self.word = self.body.addLabeledControl("&Wort:", wx.TextCtrl)
-		self.kind = self.body.addLabeledControl("Darstellungs&art:", wx.Choice,
-			choices=["Ersatztext", "ECI-Lautfolge (fortgeschritten)"])
+		self.list.InsertColumn(0, "Word", width=210)
+		self.list.InsertColumn(1, "Pronunciation", width=380)
+		self.word = self.body.addLabeledControl("&Word:", wx.TextCtrl)
+		self.kind = self.body.addLabeledControl("Entry &format:", wx.Choice,
+			choices=["Replacement text", "ECI phonemes (advanced)"])
 		self.kind.SetSelection(0)
-		self.value = self.body.addLabeledControl("Erset&zung:", wx.TextCtrl)
-		self.button("Eintrag ü&bernehmen", self.put)
-		self.button("Ausgewählten Eintrag &löschen", self.remove)
-		self.button("Aussprache &vorhören", self.hear)
-		self.analyseButton = self.button("Original-Lautfolge des Wortes er&mitteln", self.analyse)
-		self.button("Datei s&peichern und neu laden", self.save)
+		self.value = self.body.addLabeledControl("Repla&cement:", wx.TextCtrl)
+		self.button("&Apply entry", self.put)
+		self.button("&Delete selected entry", self.remove)
+		self.button("&Preview pronunciation", self.hear)
+		self.analyseButton = self.button("Anal&yze original word phonemes", self.analyse)
+		self.button("&Save file and reload", self.save)
 		self.status = self.body.addLabeledControl("Status:", wx.TextCtrl, style=wx.TE_READONLY)
-		self.body.addItem(wx.StaticText(self.content, label=("Eigene Einträge aktivieren Sie unter Sprachausgabe mit Eigene Wörterbücher\n"
-			"oder Alternative/Community + eigene Korrekturen. Japanisch und Polnisch\n"
-			"werden von diesem .dic-Editor nicht unterstützt. Änderungen zuerst übernehmen, dann speichern.")))
+		self.body.addItem(wx.StaticText(self.content, label=("Enable custom entries in Speech settings by selecting Custom dictionaries\n"
+			"or Alternative/Community + custom corrections. Japanese and Polish\n"
+			"are not supported by this .dic editor. Apply entries before saving.")))
 		self.rows, self.visible, self.dirty, self.editing = [], [], False, None
 		self.lastSelection = (self.language.GetSelection(), 0)
 		self.load()
@@ -139,7 +139,7 @@ class DictionaryDialog(ToolDialog):
 			key, value = self.rows[index]
 			row = self.list.InsertItem(self.list.GetItemCount(), key)
 			self.list.SetItem(row, 1, value)
-		self.status.SetValue("%d Einträge%s" % (len(self.rows), " – noch nicht gespeichert" if self.dirty else ""))
+		self.status.SetValue("%d entries%s" % (len(self.rows), " – not yet saved" if self.dirty else ""))
 
 	def select(self, event):
 		row = event.GetIndex()
@@ -154,7 +154,7 @@ class DictionaryDialog(ToolDialog):
 		self.draftDirty = False
 
 	def discard(self):
-		return not (self.dirty or self.draftDirty) or wx.MessageBox("Nicht gespeicherte Änderungen verwerfen?", "OpenEVV",
+		return not (self.dirty or self.draftDirty) or wx.MessageBox("Discard unsaved changes?", "OpenEVV",
 			wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self) == wx.YES
 
 	def change(self, event):
@@ -175,7 +175,7 @@ class DictionaryDialog(ToolDialog):
 		kind = "phonemes" if self.kind.GetSelection() == 1 else "text"
 		value = tools.annotation(self.value.GetValue(), kind, self.lang())
 		if any(c in key for c in "\t\n\r\x00") or not key:
-			raise ValueError("Ein gültiges Wort ohne Steuerzeichen eingeben.")
+			raise ValueError("Enter a valid word without control characters.")
 		dictionaries.parse((key+"\t"+value).encode("cp1252"))
 		rows = list(self.rows)
 		if self.editing is not None:
@@ -190,7 +190,7 @@ class DictionaryDialog(ToolDialog):
 	def remove(self):
 		index = self.list.GetFirstSelected()
 		if index < 0:
-			raise ValueError("Zuerst einen Eintrag auswählen.")
+			raise ValueError("Select an entry first.")
 		self.rows.pop(self.visible[index])
 		self.editing, self.dirty = None, True
 		self.refresh()
@@ -215,12 +215,12 @@ class DictionaryDialog(ToolDialog):
 
 	def save(self):
 		if self.draftDirty:
-			raise ValueError("Die Eingabefelder wurden geändert. Bitte zuerst Eintrag übernehmen wählen.")
+			raise ValueError("The input fields have changed. Please choose Apply entry first.")
 		self.revision = dictionaries.saveCustom(self.lang(), self.volume.GetSelection(), self.rows, self.revision)
 		self.dirty = False
 		self.refresh()
 		currentSynth().reloadDictionaries()
-		self.status.SetValue("Datei gespeichert; Neuladen des aktiven Profils angefordert.")
+		self.status.SetValue("File saved; reload of the active profile requested.")
 
 	def onClose(self, event):
 		if self.discard():
@@ -229,16 +229,16 @@ class DictionaryDialog(ToolDialog):
 
 class PresetDialog(ToolDialog):
 	def __init__(self, parent):
-		super().__init__(parent, "OpenEVV – benannte Stimmen-Presets")
-		self.choices = self.body.addLabeledControl("&Gespeicherte Presets:", wx.Choice)
+		super().__init__(parent, "OpenEVV – named voice presets")
+		self.choices = self.body.addLabeledControl("Sa&ved presets:", wx.Choice)
 		self.name = self.body.addLabeledControl("&Name:", wx.TextCtrl)
-		self.button("Aktuelle Einstellungen &speichern", self.save)
-		self.button("Ausgewähltes Preset &anwenden", self.apply)
-		self.button("Ausgewähltes Preset &löschen", self.remove)
+		self.button("&Save current settings", self.save)
+		self.button("&Apply selected preset", self.apply)
+		self.button("&Delete selected preset", self.remove)
 		self.status = self.body.addLabeledControl("Status:", wx.TextCtrl, style=wx.TE_READONLY)
-		self.body.addItem(wx.StaticText(self.content, label=("Enthält Sprache, Stimme, Geschwindigkeit, Klangparameter, Wörterbuchprofil\n"
-			"und Sample-Rate. Nach dem Anwenden können Sie die NVDA-Konfiguration speichern.\n"
-			"Für automatische Programmwechsel verwenden Sie NVDAs Konfigurationsprofile.")))
+		self.body.addItem(wx.StaticText(self.content, label=("Includes language, voice, rate, voice parameters, dictionary profile\n"
+			"and sample rate. You can save the NVDA configuration after applying a preset.\n"
+			"Use NVDA configuration profiles for automatic switching between applications.")))
 		self.refresh()
 		self.choices.Bind(wx.EVT_CHOICE, lambda e: self.name.SetValue(self.choices.GetStringSelection()))
 		self.finish()
@@ -252,71 +252,71 @@ class PresetDialog(ToolDialog):
 	def chosen(self):
 		name = self.choices.GetStringSelection()
 		if not name:
-			raise ValueError("Zuerst ein gespeichertes Preset auswählen.")
+			raise ValueError("Select a saved preset first.")
 		return name
 
 	def save(self):
 		name = self.name.GetValue().strip()
-		if name in tools.readPresets() and wx.MessageBox("Vorhandenes Preset überschreiben?", "OpenEVV",
+		if name in tools.readPresets() and wx.MessageBox("Overwrite the existing preset?", "OpenEVV",
 			wx.YES_NO | wx.NO_DEFAULT, self) != wx.YES:
 			return
 		tools.savePreset(name, currentSynth())
 		self.refresh(name)
-		self.status.SetValue("Preset gespeichert: " + name)
+		self.status.SetValue("Preset saved: " + name)
 
 	def apply(self):
 		name = self.chosen()
 		tools.applyPreset(currentSynth(), name)
-		self.status.SetValue("Preset angewendet: " + name)
+		self.status.SetValue("Preset applied: " + name)
 
 	def remove(self):
 		name = self.chosen()
-		if wx.MessageBox("Preset löschen: " + name + "?", "OpenEVV", wx.YES_NO | wx.NO_DEFAULT, self) != wx.YES:
+		if wx.MessageBox("Delete preset: " + name + "?", "OpenEVV", wx.YES_NO | wx.NO_DEFAULT, self) != wx.YES:
 			return
 		tools.deletePreset(name)
 		self.refresh()
-		self.status.SetValue("Preset gelöscht.")
+		self.status.SetValue("Preset deleted.")
 
 
 class WpmDialog(ToolDialog):
 	def __init__(self, parent):
-		super().__init__(parent, "OpenEVV – Wörter pro Minute")
+		super().__init__(parent, "OpenEVV – words per minute")
 		current = tools.rawToWpm(currentSynth()._voiceParams[engine.VOICE_SPEED])
-		self.value = self.body.addLabeledControl("&Gewünschte Wörter pro Minute:", wx.SpinCtrl,
+		self.value = self.body.addLabeledControl("Desired &words per minute:", wx.SpinCtrl,
 			min=149, max=1297, initial=max(149, min(1297, current)))
-		self.button("Geschwindigkeit ü&bernehmen", self.apply)
+		self.button("&Apply rate", self.apply)
 		self.status = self.body.addLabeledControl("Status:", wx.TextCtrl, style=wx.TE_READONLY,
-			value="Aktueller Engine-Wert: %d WPM" % current)
-		self.body.addItem(wx.StaticText(self.content, label=("Der nächstliegende Wert der NVDA-Geschwindigkeitsstufen wird gewählt.\n"
-			"Bei Bedarf wird Geschwindigkeitsanhebung aktiviert. Der erreichte Wert wird angezeigt.\n"
-			"WPM ist die Engine-Einstellung; die tatsächliche Wortzahl hängt vom Text ab.")))
+			value="Current engine setting: %d WPM" % current)
+		self.body.addItem(wx.StaticText(self.content, label=("The closest available NVDA speech rate is selected.\n"
+			"Rate boost is enabled if needed. The resulting value is displayed.\n"
+			"WPM is the engine setting; the actual word count depends on the text.")))
 		self.finish()
 
 	def apply(self):
 		synth = currentSynth()
 		percent, boost, actual = tools.wpmChoice(synth, self.value.GetValue())
 		synth.rateBoost, synth.rate = boost, percent
-		self.status.SetValue("Übernommen: %d WPM; Geschwindigkeit %d %%; Anhebung %s" % (
-			actual, percent, "an" if boost else "aus"))
+		self.status.SetValue("Applied: %d WPM; rate %d %%; boost %s" % (
+			actual, percent, "on" if boost else "off"))
 
 
 class PronunciationDialog(ToolDialog):
 	def __init__(self, parent):
-		super().__init__(parent, "OpenEVV – Aussprache und Zahlen vorhören")
+		super().__init__(parent, "OpenEVV – pronunciation and number preview")
 		synth = currentSynth()
 		self.languages = list(synth._engine.languages)
-		self.language = self.body.addLabeledControl("&Sprache:", wx.Choice,
+		self.language = self.body.addLabeledControl("&Language:", wx.Choice,
 			choices=[engine.nameOf(lang) for lang in self.languages])
 		self.language.SetSelection(self.languages.index(synth._language))
 		self.kinds = list(tools.KINDS)
-		self.kind = self.body.addLabeledControl("&Lesart:", wx.Choice, choices=list(tools.KINDS.values()))
+		self.kind = self.body.addLabeledControl("Reading &format:", wx.Choice, choices=list(tools.KINDS.values()))
 		self.kind.SetSelection(0)
-		self.text = self.body.addLabeledControl("&Text oder Wert:", wx.TextCtrl)
-		self.button("&Vorhören", self.hear)
-		self.body.addItem(wx.StaticText(self.content, label=("Beispiele: Ordnungszahl 12; Telefon +49 30 123456; Geldbetrag 12,50;\n"
-			"Datum 19/09/2026 (Tag/Monat/Jahr). ECI-Lautfolgen ohne äußere Klammern.\n"
-			"Diese Lesart gilt nur für die Vorschau. Normale NVDA-Ausgaben bleiben unverändert.\n"
-			"Die besonderen Lesarten sind für die acht westlichen Sprachvarianten freigegeben.")))
+		self.text = self.body.addLabeledControl("&Text or value:", wx.TextCtrl)
+		self.button("&Preview", self.hear)
+		self.body.addItem(wx.StaticText(self.content, label=("Examples: ordinal 12; telephone +49 30 123456; currency amount 12.50;\n"
+			"Date 19/09/2026 (day/month/year). Enter ECI phonemes without outer brackets.\n"
+			"This format applies only to the preview. Ordinary NVDA speech is unchanged.\n"
+			"Special formats support the eight Western language variants.")))
 		self.finish()
 
 	def hear(self):
@@ -329,33 +329,33 @@ class OpenEvvPanel(settingsDialogs.SettingsPanel):
 	def makeSettings(self, sizer):
 		helper = guiHelper.BoxSizerHelper(self, sizer=sizer)
 		helper.addItem(wx.StaticText(self, label=(
-			"Das Aussprachewörterbuch wählen Sie unter Sprachausgabe.\n"
-			"Original ist der Standard. Downloads sind optional; eigene Dateien bleiben erhalten.")))
+			"Select the pronunciation dictionary in Speech settings.\n"
+			"Original is the default. Downloads are optional; custom files are preserved.")))
 		self.providers = list(dictionaries.PROVIDERS)
-		self.provider = helper.addLabeledControl("Wörterbuch-&Quelle:", wx.Choice,
+		self.provider = helper.addLabeledControl("Dictionary so&urce:", wx.Choice,
 			choices=[dictionaries.PROFILES[p] for p in self.providers])
 		self.provider.SetSelection(0)
-		self.downloadButton = helper.addItem(wx.Button(self, label="&Herunterladen / aktualisieren"))
+		self.downloadButton = helper.addItem(wx.Button(self, label="&Download / update"))
 		self.downloadButton.Bind(wx.EVT_BUTTON, self.onDownload)
-		self.customButton = helper.addItem(wx.Button(self, label="&Ordner für eigene Wörterbücher öffnen"))
+		self.customButton = helper.addItem(wx.Button(self, label="&Open custom dictionary folder"))
 		self.customButton.Bind(wx.EVT_BUTTON, self.onCustom)
-		self.reloadButton = helper.addItem(wx.Button(self, label="Aktives Wörterbuch &neu laden"))
+		self.reloadButton = helper.addItem(wx.Button(self, label="&Reload active dictionary"))
 		self.reloadButton.Bind(wx.EVT_BUTTON, self.onReload)
 		self.toolButtons = []
-		for label, cls in (("Wörterbuch-&Editor öffnen", DictionaryDialog),
-			("Stimmen-&Presets verwalten", PresetDialog), ("Wörter pro &Minute einstellen", WpmDialog),
-			("Aussprache und Zahlen &vorhören", PronunciationDialog)):
+		for label, cls in (("Open dictionary &editor", DictionaryDialog),
+			("Manage voice &presets", PresetDialog), ("Set words per &minute", WpmDialog),
+			("Pre&view pronunciation and numbers", PronunciationDialog)):
 			button = helper.addItem(wx.Button(self, label=label))
 			button.Bind(wx.EVT_BUTTON, lambda event, cls=cls: self.openTool(cls))
 			self.toolButtons.append(button)
 		self.status = helper.addLabeledControl("&Status:", wx.TextCtrl, style=wx.TE_READONLY | wx.TE_MULTILINE)
 		self.status.SetValue(self.statusText())
 		helper.addItem(wx.StaticText(self, label=(
-			"Windows-Anmeldung: OpenEVV auswählen, Einstellungen speichern und in Allgemein\n"
-			"NVDA für die Anmeldung aktivieren. Gespeicherte Einstellungen übernehmen und\n"
-			"OpenEVV im Kopierdialog auswählen. Nach Updates erneut übernehmen.\n"
-			"Benötigt eine installierte NVDA-Version und Administratorrechte.")))
-		self.logonButton = helper.addItem(wx.Button(self, label="Zur &Anmeldeeinrichtung (Allgemein)"))
+			"Windows sign-in: select OpenEVV, save settings, then open General settings\n"
+			"and enable NVDA during sign-in. Copy the saved settings and select\n"
+			"OpenEVV in the copy dialog. Repeat the copy after updates.\n"
+			"Requires an installed copy of NVDA and administrator privileges.")))
+		self.logonButton = helper.addItem(wx.Button(self, label="Open sign-in setup (&General)"))
 		self.logonButton.Bind(wx.EVT_BUTTON, self.onLogon)
 		self.busy = False
 		if globalVars.appArgs.secure:
@@ -380,12 +380,12 @@ class OpenEvvPanel(settingsDialogs.SettingsPanel):
 		for profile in dictionaries.PROVIDERS:
 			path = dictionaries.directory(profile)
 			files = sorted(p.name for p in path.glob("*.dic")) if path else []
-			lines.append(dictionaries.PROFILES[profile] + ": " + (", ".join(files) or "nicht heruntergeladen"))
+			lines.append(dictionaries.PROFILES[profile] + ": " + (", ".join(files) or "not downloaded"))
 		synth = synthDriverHandler.getSynth()
 		if synth and synth.name == "openevv":
-			lines.append("Aktiv: " + dictionaries.PROFILES[synth.dictionaryProfile])
+			lines.append("Active: " + dictionaries.PROFILES[synth.dictionaryProfile])
 			if synth._engine.dictionaryError:
-				lines.append("Ladefehler: " + synth._engine.dictionaryError)
+				lines.append("Loading error: " + synth._engine.dictionaryError)
 		return "\n".join(lines)
 
 	def onDownload(self, event):
@@ -394,16 +394,16 @@ class OpenEvvPanel(settingsDialogs.SettingsPanel):
 		profile = self.providers[self.provider.GetSelection()]
 		self.busy = True
 		self.downloadButton.Disable()
-		self.status.SetValue("Wörterbuch wird heruntergeladen …")
+		self.status.SetValue("Downloading dictionary …")
 		def work():
 			success = False
 			try:
 				files = dictionaries.download(profile)
 				success = True
-				message = "Heruntergeladen: " + ", ".join(files)
+				message = "Downloaded: " + ", ".join(files)
 			except Exception as error:
 				log.error("openevv: dictionary download failed", exc_info=True)
-				message = "Download fehlgeschlagen; bisherige Dateien bleiben erhalten. " + str(error)
+				message = "Download failed; existing files have been preserved. " + str(error)
 			wx.CallAfter(done, message, success)
 		def done(message, success):
 			if not self:

@@ -64,8 +64,8 @@ def simulated():
             for name in [v.displayName for v in d.availableLanguages.values()]:
                 assert isinstance(name, str)
                 assert not any(bad in name for bad in ("Ã", "Â", "\ufffd"))
-        assert d.availableLanguages["de_DE"].displayName == "Deutsch"
-        assert d.availableLanguages["fr_FR"].displayName == "Français"
+        assert d.availableLanguages["de_DE"].displayName == "German"
+        assert d.availableLanguages["fr_FR"].displayName == "French"
         umlauts = "äöüÄÖÜß"
         assert e.encodeText(umlauts, 0x40000) == b"\xe4\xf6\xfc\xc4\xd6\xdc\xdf"
         assert e.decodeName(umlauts.encode("cp1252"), 0x40000) == umlauts

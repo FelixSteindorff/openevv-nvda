@@ -171,7 +171,7 @@ class SynthDriver(SynthDriver):
 		BooleanDriverSetting("abbreviations", _("Expand a&bbreviations"), False),
 		# Translators: Label for a setting in voice settings dialog.
 		BooleanDriverSetting("voiceTags", _("Allow backquote voice &tags"), False),
-		DriverSetting("dictionaryProfile", "Aussprache&wörterbuch", False, defaultVal="builtin"),
+		DriverSetting("dictionaryProfile", "Pronunciation &dictionary", False, defaultVal="builtin"),
 		# Translators: Label for a setting in voice settings dialog.
 		DriverSetting("samplerate", _("Sa&mple rate"), False, defaultVal="11025"),
 	)
@@ -383,7 +383,7 @@ class SynthDriver(SynthDriver):
 		"""A user-requested preview; never enables raw voice tags in normal text."""
 		language = self._language if language is None else language
 		if language not in self._engine.languages:
-			raise ValueError("Diese Sprache ist in der DLL nicht verfügbar.")
+			raise ValueError("This language is not available in the DLL.")
 		marked = tools.annotation(text, kind, language)
 		payload = _openevv.encodeText(marked, language)
 		engine = self._engine

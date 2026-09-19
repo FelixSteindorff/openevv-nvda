@@ -186,14 +186,14 @@ LOCALES = {
 LANGUAGE_NAMES = {
 	0x10000: "American English",
 	0x10001: "British English",
-	0x20000: "Español (España)",
-	0x20001: "Español (Latinoamérica)",
-	0x30000: "Français",
-	0x30001: "Français (Canada)",
-	0x40000: "Deutsch",
-	0x50000: "Italiano",
-	0x80000: "日本語 (Experimental)",
-	0x110000: "Polski (Experimental)",
+	0x20000: "Spanish (Spain)",
+	0x20001: "Spanish (Latin America)",
+	0x30000: "French",
+	0x30001: "French (Canada)",
+	0x40000: "German",
+	0x50000: "Italian",
+	0x80000: "Japanese (Experimental)",
+	0x110000: "Polish (Experimental)",
 }
 
 # The byte ECI interface is not UTF-8 for IBM's Western languages. Do not
@@ -548,16 +548,16 @@ class Engine:
 	def phonemes(self, text, language):
 		"""Explicit editor analysis on the worker, isolated from the speech handle."""
 		if language not in dictionaries.PREFIXES:
-			raise ValueError("Lautfolgenanalyse ist für diese Sprache nicht freigegeben.")
+			raise ValueError("Phoneme analysis is not supported for this language.")
 		text = text.strip().replace("`", " ")
 		if not text or len(text) > 128:
-			raise ValueError("Für die Lautfolgenanalyse 1 bis 128 Zeichen eingeben.")
+			raise ValueError("Enter 1 to 128 characters for phoneme analysis.")
 		dll = self._dll
 		dll.eciGeneratePhonemes.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p]
 		dll.eciGeneratePhonemes.restype = ctypes.c_int
 		handle = dll.eciNewEx(language)
 		if not handle:
-			raise OpenEvvError("Die Analyseinstanz konnte nicht erstellt werden.")
+			raise OpenEvvError("The analysis instance could not be created.")
 		buffer = ctypes.create_string_buffer(8192)
 		samples = (ctypes.c_short * FRAME)()
 		chunks = []
@@ -571,15 +571,15 @@ class Engine:
 			# Phoneme generation restores the previous output afterwards. Keep
 			# it on a buffer, never the engine's unsupported default device.
 			if not dll.eciSetOutputBuffer(handle, FRAME, samples):
-				raise OpenEvvError("Der Analysepuffer wurde abgelehnt.")
+				raise OpenEvvError("The analysis buffer was rejected.")
 			# Request phoneme text only. The legacy phoneme-index callback
 			# carries a 32-bit record pointer and is not usable in this x64 path.
 			dll.eciSetParam(handle, 7, 0)
 			dll.eciSetParam(handle, PARAM_SYNTH_MODE, 1)
 			if not dll.eciAddText(handle, encodeText(text, language)):
-				raise OpenEvvError("Die Engine hat den Analysetext abgelehnt.")
+				raise OpenEvvError("The engine rejected the analysis text.")
 			if not dll.eciGeneratePhonemes(handle, len(buffer), buffer):
-				raise OpenEvvError("Die Engine konnte keine Lautfolge erzeugen.")
+				raise OpenEvvError("The engine could not generate a phoneme sequence.")
 			return b"".join(chunks).decode(encodingOf(language))
 		finally:
 			dll.eciDelete(handle)

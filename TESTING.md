@@ -1,6 +1,6 @@
-# Testen
+# Testing
 
-## Ohne Engine
+## Without an engine
 
 ```powershell
 python nvda/test/sequence.py
@@ -9,28 +9,28 @@ python nvda/test/settings.py
 python tools/check_repository.py
 ```
 
-Die Engine-Tests injizieren gezielt Fehler, unter anderem ungültige Sample-Raten und einen blockierten Player. Entsprechende Logmeldungen sind erwartet; entscheidend sind Exitcode und die abschließende Erfolgsmeldung. Es wird keine installierte NVDA-Instanz verändert.
+The engine tests deliberately inject failures, including invalid sample rates and a blocked player. Related log messages are expected; check the exit code and final success message. No installed NVDA instance is modified.
 
-## Mit separat bereitgestellter OpenEVV-x64-DLL
+## With a separately supplied OpenEVV x64 DLL
 
-Die folgenden Tests wurden mit der lokalen, mehrsprachigen Entwicklungs-DLL durchgeführt. Die DLL ist hier nicht enthalten. Mehrsprachige Tests erwarten deren zehn Sprachvarianten; fehlende Sprachen sind eine andere Testkonfiguration, keine automatische Treiberregression.
+The following tests have been run with the local multilingual development DLL. That DLL is not included here. Multilingual tests expect its ten language variants; missing languages indicate a different test configuration, not automatically a driver regression.
 
 ```powershell
-python nvda/test/settings.py --dll C:/mein-lokaler-pfad/eci.dll --out build/settings
-python nvda/test/features.py --dll C:/mein-lokaler-pfad/eci.dll --out build/features
-python nvda/build.py --version 0.1.0 --dll C:/mein-lokaler-pfad/eci.dll
+python nvda/test/settings.py --dll C:/my-local-path/eci.dll --out build/settings
+python nvda/test/features.py --dll C:/my-local-path/eci.dll --out build/features
+python nvda/build.py --version 0.1.0 --dll C:/my-local-path/eci.dll
 python -m zipfile -e build/openevv-0.1.0.nvda-addon build/packaged
 python nvda/test/windows.py build/packaged
 python nvda/test/unicode_hyphens.py --addon build/packaged --out build/hyphens
 python nvda/test/unicode_text.py --addon build/packaged --out build/unicode
 ```
 
-Alle Ausgaben unter `build/` sind lokal und von Git ausgeschlossen. Sie können IBM-Daten, Audio oder lokal konfigurierte Werte enthalten und gehören nicht automatisch in öffentliche Issues oder Releases.
+All output under `build/` is local and excluded from Git. It may contain IBM data, audio or locally configured values and is not automatically suitable for public issues or releases.
 
-Die Unicode-Tests vergleichen je Sprache und Schreibweise getrennte Prozesse, damit globaler Legacy-Engine-Zustand nicht zwischen Referenz und Vergleich überlebt. Sie prüfen PCM-Gleichheit mit einer definierten Referenz, nicht die muttersprachliche Qualität beliebiger Texte.
+Unicode tests use separate processes for each language and spelling so that global legacy engine state cannot carry over between the reference and comparison. They check PCM equality against a defined reference, not native-speaker quality for arbitrary text. Multilingual speech samples and Unicode fixtures intentionally retain their original text even though the documentation and interface are in English.
 
-## Dokumentierter Ausgangsstand
+## Documented baseline
 
-Die lokale Variante vor dieser Repository-Abtrennung bestand Tests mit echter DLL für Sprache/Stimme/Persistenz, DE/EN mit acht Stimmen, schnelle temporäre Sprachwechsel, Stop/Folgeausgabe und sieben Sample-Raten. Die Aussprachewerkzeuge bestanden 56 Vorschauen; 251 WPM-Rohwerte wurden mit der Engine verglichen. Die Unicode-Erweiterung bestand 170 Layout-/Typografiefälle und 18 PCM-Paarvergleiche sowie normale deutsche und englische Sprachausgabe in echtem NVDA 2026.2 auf einem isolierten Desktop.
+Before this repository was separated, the local variant passed real-DLL tests for language, voice and persistence, German and English with eight voices, rapid temporary language changes, stop followed by a new utterance, and seven sample rates. Pronunciation tools passed 56 previews; 251 raw WPM values were checked against the engine. The Unicode extension passed 170 layout and typography cases and 18 PCM pair comparisons, plus ordinary German and English speech in real NVDA 2026.2 on an isolated desktop.
 
-Diese Ergebnisse betreffen eine konkrete lokale DLL. Die öffentliche CI prüft die separat ausführbaren Python-Tests; sie behauptet keine erneute Validierung einer nicht enthaltenen Engine. Interaktive NVDA-Tests, ein Hörtest und ein echter Windows-Anmeldevorgang bleiben gesonderte Prüfungen.
+These results apply to a specific local DLL. Public CI checks the independently runnable Python tests; it does not claim to revalidate an engine that is not included. Interactive NVDA tests, listening tests and an actual Windows sign-in session remain separate checks.

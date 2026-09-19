@@ -1,42 +1,42 @@
-# OpenEVV für NVDA
+# OpenEVV for NVDA
 
-Weiterentwickelter NVDA-Treiber auf Basis von [Mudb0y/openevv](https://github.com/Mudb0y/openevv), gepflegt von Felix Steindorff. Schwerpunkt sind zuverlässige Bedienung, klassische Eloquence-Ausgabe, Aussprachewerkzeuge und Unicode-Verarbeitung.
+An extended NVDA driver based on [Mudb0y/openevv](https://github.com/Mudb0y/openevv), maintained by Felix Steindorff. It focuses on reliable controls, classic Eloquence output, pronunciation tools and Unicode handling.
 
-**Dieses Repository enthält ausschließlich den Add-on-Quellcode, Tests und Dokumentation. Eine Engine-DLL, IBM-Sprachdaten oder ein sofort sprechendes Installationspaket sind nicht enthalten.** Die Weitergaberechte an den aus dem IBM-SDK übernommenen Bestandteilen sind nicht geklärt. Sie fallen nicht unter die MIT-Lizenz dieses Treibers. Siehe [Lizenzumfang](NOTICE.md).
+**This repository contains only add-on source code, tests and documentation. It does not include an engine DLL, IBM language data or a ready-to-use speech package.** Redistribution rights for components originating from the IBM SDK remain unresolved. These components are not covered by this driver's MIT license. See [licensing scope](NOTICE.md).
 
-## Funktionen
+## Features
 
-- Sprache und Stimme getrennt auswählen; verfügbare Sprachen werden aus der Engine ermittelt.
-- Acht klassische Stimmen mit stabilen IDs: Reed, Shelley, Sandy, Rocko, Glen, FastFlo, Grandma, Grandpa.
-- Persistente Einstellungen; automatische Sprachwechsel behalten die Stimme und kehren zur Standardsprache zurück.
-- **11 kHz (Classic)** als Standard und Empfehlung. 22 kHz heißt ausdrücklich **Experimental**; 16/32/44,1/48 kHz sind **Resampled**. Enhanced bleibt deaktiviert.
-- Geschwindigkeit, Tonhöhe, Tonhöhenumfang, Lautstärke, Geschwindigkeitsanhebung, Kopfgröße, Rauheit und Behauchtheit.
-- Optionale Aussprachewörterbücher mit Editor, Vorschau und eigenen Korrekturen zusätzlich zu Community-/Alternative-Dateien.
-- Benannte Stimmen-Presets, WPM-Eingabe sowie Phonetik- und Zahlenvorschau.
-- Korrekturen für Unicode-Bindestriche, Layoutzeichen und nicht darstellbare typografische Varianten, einschließlich konsistenter Satzaufteilung.
-- Unterstützung von NVDAs Konfigurationskopie für Anmeldung und sichere Bildschirme; dort keine Downloads oder Dateiverwaltung.
+- Separate language and voice selectors; available languages are discovered from the engine.
+- Eight classic voices with stable IDs: Reed, Shelley, Sandy, Rocko, Glen, FastFlo, Grandma, Grandpa.
+- Persistent settings; automatic language changes preserve the voice and return to the default language.
+- **11 kHz (Classic)** as the recommended default. 22 kHz is explicitly labeled **Experimental**; 16/32/44.1/48 kHz are **Resampled**. Enhanced remains disabled.
+- Rate, pitch, pitch range, volume, rate boost, head size, roughness and breathiness controls.
+- Optional pronunciation dictionaries with an editor, preview and custom corrections layered over Community or Alternative files.
+- Named voice presets, WPM input, phoneme analysis and number previews.
+- Handling of Unicode hyphens, layout characters and unsupported typographic variants, including consistent sentence splitting.
+- Support for NVDA's configuration copy for sign-in and secure screens; downloads and file management are disabled there.
 
-Die lokale Entwicklung wurde mit einer Windows-x64-Engine mit zehn Sprachvarianten getestet: US-/UK-Englisch, Deutsch, Spanien-/Lateinamerika-Spanisch, Frankreich-/Kanada-Französisch, Italienisch sowie experimentell Japanisch und Polnisch. **Welche davon tatsächlich auswählbar sind, bestimmt die separat bereitgestellte DLL.** Phonetik und spezielle Aussprachewerkzeuge unterstützen die acht westlichen Varianten.
+Local development was tested with a Windows x64 engine containing ten language variants: American and British English, German, Spanish (Spain and Latin America), French (France and Canada), Italian, and experimental Japanese and Polish. **The separately supplied DLL determines which languages are actually available.** Phoneme analysis and special pronunciation tools support the eight Western variants.
 
-## Voraussetzungen und lokaler Build
+## Requirements and local build
 
-- Windows und **64-Bit-NVDA**; tatsächlich getestet mit NVDA 2026.2.
-- Python 3.11 oder neuer zum Bauen und Testen.
-- Eine separat und mit passenden Rechten bereitgestellte, kompatible **OpenEVV-x64-`eci.dll`**. Ein beliebiger anderer Eloquence-Build ist nicht automatisch kompatibel. Dieses Repository lädt keine Engine herunter und baut keine IBM-Daten.
+- Windows and **64-bit NVDA**; tested with NVDA 2026.2.
+- Python 3.11 or later for building and testing.
+- A separately supplied, compatible **OpenEVV x64 `eci.dll`**, with appropriate usage rights. Other Eloquence builds are not automatically compatible. This repository does not download an engine or build IBM data.
 
 ```powershell
-python nvda/build.py --version 0.1.0 --dll C:/mein-lokaler-pfad/eci.dll
+python nvda/build.py --version 0.1.0 --dll C:/my-local-path/eci.dll
 ```
 
-Der Build prüft Architektur und benötigte ECI-Exporte und erzeugt `build/openevv-0.1.0.nvda-addon`. Erfolgreiche Exportprüfung belegt noch nicht die vollständige Kompatibilität; die Tests mit echter DLL bleiben erforderlich. Die lokal eingebundene Engine wird in dieses Paket aufgenommen. **Das gibt keine zusätzlichen Rechte, das fertige Paket weiterzugeben.** Zusätzliche Herkunfts-/Lizenztexte der Engine können mit `--engine-notice PFAD` beigefügt werden.
+The build checks the architecture and required ECI exports, then creates `build/openevv-0.1.0.nvda-addon`. Passing the export check does not establish full compatibility; tests with the real DLL are still required. The supplied engine is included in the local package. **This does not grant additional rights to redistribute the resulting package.** Additional engine provenance or license notices can be included with `--engine-notice PATH`.
 
-Das Paket in NVDA installieren und OpenEVV als Sprachausgabe wählen. Einstellungen nach Bedarf mit **NVDA+Strg+C** speichern. Es verwendet den bisherigen internen Namen `openevv` und aktualisiert daher vorhandene OpenEVV-Testinstallationen, statt einen zweiten Synthesizer einzurichten.
+Install the package in NVDA and select OpenEVV as the speech synthesizer. Save settings with **NVDA+Control+C** as needed. The package retains the internal name `openevv`, so it updates existing OpenEVV test installations rather than installing a second synthesizer.
 
-Die ausführliche Bedienung steht in der [deutschen Hilfe](nvda/addon/doc/de/readme.html) und der [English help](nvda/addon/doc/en/readme.html). Die Sprachangaben dort beschreiben die lokal getestete Engine-Konfiguration; das öffentliche Repository liefert diese Engine nicht mit.
+See the [user guide](nvda/addon/doc/en/readme.html) for detailed instructions. Its language descriptions refer to the locally tested engine configuration; the public repository does not include that engine. Documentation and add-on-specific interface text are in English. Multilingual pronunciation and Unicode test inputs intentionally retain their original languages.
 
 ## Tests
 
-Ohne Engine-DLL, auch in GitHub Actions:
+Without an engine DLL, including in GitHub Actions:
 
 ```powershell
 python nvda/test/sequence.py
@@ -45,19 +45,18 @@ python nvda/test/settings.py
 python tools/check_repository.py
 ```
 
-Zusätzliche Tests mit eigener kompatibler DLL sind in [TESTING.md](TESTING.md) beschrieben. Diese verwenden simulierte NVDA-Module und aufgezeichnetes PCM. Sie ersetzen keinen Hörtest oder interaktiven Test mit NVDA. Die öffentlichen CI-Läufe laden keine Engine und veröffentlichen keine Binärpakete.
+[TESTING.md](TESTING.md) describes additional tests using a compatible DLL supplied locally. These use simulated NVDA modules and captured PCM. They do not replace listening tests or interactive NVDA testing. Public CI runs do not download an engine or publish binary packages.
 
-## Bekannte Grenzen
+## Known limitations
 
-- Native 22.050-Hz-Synthese hat gegenüber Classic 11.025 Hz keinen nachgewiesenen qualitativen Gesamtvorteil. Die ursprüngliche Ausgabe bleibt empfohlen.
-- Die gemeldete leise Hintergrundstörung bei Resampling und schneller Navigation ist nicht abschließend als behoben nachgewiesen.
-- Japanisch besitzt bekannte native Fehler bei bestimmten Steuerzeichen; der Treiber filtert dort rohe Text-Tags. Polnisch ist noch unvollständig. Beide bleiben experimentell.
-- Die Legacy-Zeichenkodierungen unterstützen nicht sämtliche Unicode-Zeichen. NVDAs Symbolverarbeitung und die passende Sprachwahl bleiben wichtig.
-- Ein echter Windows-Anmeldevorgang wurde nicht getestet. Geprüft wurden ein isoliertes NVDA im sicheren Modus und die Konfigurationskopie mit Testziel.
-- Die zusätzliche Verwaltungsoberfläche ist überwiegend deutsch; eine vollständige Übersetzung ist noch offen.
+- Native 22,050 Hz synthesis has no demonstrated overall quality advantage over Classic 11,025 Hz. The original output remains recommended.
+- The reported quiet background noise during resampling and rapid navigation has not been conclusively verified as resolved.
+- Japanese has known native failures with certain control sequences; the driver filters raw text tags for that language. Polish remains incomplete. Both are experimental.
+- Legacy encodings cannot represent every Unicode character. NVDA's symbol processing and the correct language selection remain important.
+- An actual Windows sign-in session has not been tested. Testing covered an isolated NVDA instance in secure mode and configuration copying to a test destination.
 
-## Herkunft und Beiträge
+## Origin and contributions
 
-Ausgangspunkt ist OpenEVV-Commit `0f2c8fad08c4fbfd1364b14993e3ccdcfcf9e6b6`, ergänzt um die lokal entwickelten NVDA-Änderungen bis zum Unicode-Testbuild vom 19. September 2026. Dieses Repository beginnt bewusst mit einer eigenen Versionsgeschichte des Treibers und übernimmt keine Engine-/SDK-Historie.
+The starting point is OpenEVV commit `0f2c8fad08c4fbfd1364b14993e3ccdcfcf9e6b6`, with locally developed NVDA changes through the Unicode test build of September 19, 2026. This repository starts a separate driver history and does not import engine or SDK history.
 
-Fehlerberichte bitte mit NVDA-Version, Windows-/Engine-Version, Sprache, Stimme, Sample-Rate und einem möglichst kurzen Beispieltext. Keine privaten NVDA-Konfigurationen, Sprachdaten oder kommerziellen DLLs hochladen. Siehe [CONTRIBUTING.md](CONTRIBUTING.md).
+Please include the NVDA version, Windows and engine versions, language, voice, sample rate and a minimal example in bug reports. Do not upload private NVDA configurations, language data or commercial DLLs. See [CONTRIBUTING.md](CONTRIBUTING.md).

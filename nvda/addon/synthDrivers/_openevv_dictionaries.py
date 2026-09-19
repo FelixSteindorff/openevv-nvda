@@ -15,12 +15,12 @@ import uuid
 import zipfile
 
 PROFILES = {
-	"builtin": "Original (keine Zusatzwörterbücher)",
-	"alternative": "Alternative (Englisch/Spanisch)",
-	"community": "Community (Deutsch/Englisch)",
-	"custom": "Eigene Wörterbücher",
-	"alternative_custom": "Alternative + eigene Korrekturen",
-	"community_custom": "Community + eigene Korrekturen",
+	"builtin": "Original (no additional dictionaries)",
+	"alternative": "Alternative (English/Spanish)",
+	"community": "Community (German/English)",
+	"custom": "Custom dictionaries",
+	"alternative_custom": "Alternative + custom corrections",
+	"community_custom": "Community + custom corrections",
 }
 PROVIDERS = {
 	"alternative": "https://github.com/mohamed00/AltIBMTTSDictionaries/archive/refs/heads/master.zip",
@@ -70,10 +70,10 @@ def parse(data, encoding="cp1252"):
 		key, sep, value = line.partition("\t")
 		key, value = key.strip(), value.strip()
 		if not sep or not key or not value or "\x00" in line:
-			raise ValueError("Ungültiger Wörterbucheintrag in Zeile %d" % number)
+			raise ValueError("Invalid dictionary entry on line %d" % number)
 		key, value = key.encode(encoding), value.encode(encoding)
 		if len(key) > 128 or len(value) > 512:
-			raise ValueError("Wörterbucheintrag zu lang in Zeile %d" % number)
+			raise ValueError("Dictionary entry too long on line %d" % number)
 		entries.append((key, value))
 	return entries
 
@@ -91,7 +91,7 @@ def entries(profile, language, base=None):
 			continue
 		volume = VOLUMES[match[2].lower()]
 		if volume in seen or file.stat().st_size > MAX_BYTES:
-			raise ValueError("Doppeltes oder zu großes Wörterbuch: " + file.name)
+			raise ValueError("Duplicate or oversized dictionary: " + file.name)
 		seen.add(volume)
 		result.extend((volume, key, value) for key, value in parse(file.read_bytes()))
 	return result
@@ -143,7 +143,7 @@ def prepared(profile, languages, base=None):
 				continue
 			volume = VOLUMES[match[2].lower()]
 			if volume in seen or file.stat().st_size > MAX_BYTES:
-				raise ValueError("Doppeltes oder zu großes Wörterbuch: " + file.name)
+				raise ValueError("Duplicate or oversized dictionary: " + file.name)
 			seen.add(volume)
 			raw = file.read_bytes()
 			# Content-addressed: original files stay untouched, including custom
@@ -151,7 +151,7 @@ def prepared(profile, languages, base=None):
 			target = base / "prepared" / (hashlib.sha256(raw).hexdigest() + ".dic")
 			if not target.is_file():
 				if secure:
-					raise ValueError("Wörterbuch zunächst im normalen NVDA laden und erneut für die Anmeldung übernehmen")
+					raise ValueError("Load the dictionary in normal NVDA first, then copy the settings for sign-in again")
 				normal = b"\n".join(key+b"\t"+value for key, value in parse(raw)) + b"\n\n"
 				target.parent.mkdir(parents=True, exist_ok=True)
 				temp = target.with_suffix("." + uuid.uuid4().hex + ".tmp")
@@ -164,9 +164,9 @@ def prepared(profile, languages, base=None):
 def install(profile, archive, base=None):
 	ensureWritable()
 	if profile not in PROVIDERS:
-		raise ValueError("Dieses Profil wird nicht heruntergeladen")
+		raise ValueError("This profile cannot be downloaded")
 	if len(archive) > MAX_BYTES:
-		raise ValueError("Wörterbuch-Download zu groß")
+		raise ValueError("Dictionary download too large")
 	files = {}
 	with zipfile.ZipFile(io.BytesIO(archive)) as z:
 		for info in z.infolist():
@@ -177,12 +177,12 @@ def install(profile, archive, base=None):
 				continue
 			name = parts[1].lower()
 			if name in files or info.file_size > MAX_BYTES or sum(map(len, files.values())) + info.file_size > MAX_BYTES:
-				raise ValueError("Ungültiger Wörterbuch-Download")
+				raise ValueError("Invalid dictionary download")
 			data = z.read(info)
 			parse(data)
 			files[name] = data
 	if not files:
-		raise ValueError("Der Download enthält keine Wörterbücher")
+		raise ValueError("The download contains no dictionaries")
 	base = Path(base) if base is not None else root()
 	name = uuid.uuid4().hex
 	path = base / profile / name
@@ -209,7 +209,7 @@ def ensureWritable():
 	try:
 		import globalVars
 		if globalVars.appArgs.secure:
-			raise ValueError("Auf sicheren Bildschirmen können OpenEVV-Daten nur gelesen werden.")
+			raise ValueError("OpenEVV data is read-only on secure screens.")
 	except ImportError:
 		pass
 
@@ -227,19 +227,19 @@ def atomicWrite(path, data):
 
 def customFile(language, volume):
 	if language not in PREFIXES or volume not in VOLUMES.values():
-		raise ValueError("Eigene .dic-Dateien werden für diese Sprache nicht unterstützt.")
+		raise ValueError("Custom .dic files are not supported for this language.")
 	stem = PREFIXES[language] + next(k for k,v in VOLUMES.items() if v == volume)
 	path = directory("custom")
 	found = [p for p in path.iterdir() if p.name.lower() == stem + ".dic"] if path.exists() else []
 	if len(found) > 1:
-		raise ValueError("Mehrere Dateien für dasselbe Wörterbuch vorhanden.")
+		raise ValueError("Multiple files exist for the same dictionary.")
 	return found[0] if found else path / (stem + ".dic")
 
 
 def readCustom(language, volume):
 	path = customFile(language, volume)
 	if path.exists() and path.stat().st_size > MAX_BYTES:
-		raise ValueError("Wörterbuchdatei ist zu groß.")
+		raise ValueError("The dictionary file is too large.")
 	raw = path.read_bytes() if path.exists() else b""
 	return [(k.decode("cp1252"),v.decode("cp1252")) for k,v in parse(raw)], hashlib.sha256(raw).hexdigest()
 
@@ -249,20 +249,20 @@ def saveCustom(language, volume, rows, revision):
 	path = customFile(language, volume)
 	raw = path.read_bytes() if path.exists() else b""
 	if hashlib.sha256(raw).hexdigest() != revision:
-		raise ValueError("Die Datei wurde außerhalb des Editors geändert. Bitte schließen und neu öffnen.")
+		raise ValueError("The file was changed outside the editor. Please close and reopen it.")
 	encoding = "utf-8-sig" if raw.startswith(b"\xef\xbb\xbf") else "cp1252"
 	comments = [line for line in raw.decode(encoding).splitlines() if line.lstrip().startswith(("#", ";"))]
 	keys = set()
 	for key, value in rows:
 		if not key or not value or key.lstrip().startswith(("#", ";")) or any(c in key+value for c in "\t\r\n\x00"):
-			raise ValueError("Wort und Aussprache müssen ausgefüllt sein und dürfen keine Steuerzeichen enthalten.")
+			raise ValueError("Word and pronunciation are required and must not contain control characters.")
 		if key in keys:
-			raise ValueError("Doppelter Wörterbuchschlüssel: " + key)
+			raise ValueError("Duplicate dictionary key: " + key)
 		keys.add(key)
 	content = "\n".join(comments + [k+"\t"+v for k,v in rows]) + "\n"
 	data = content.encode(encoding)
 	parse(data)  # Enforce ECI's byte limits and CP1252 representability.
 	if len(data) > MAX_BYTES:
-		raise ValueError("Wörterbuchdatei ist zu groß.")
+		raise ValueError("The dictionary file is too large.")
 	atomicWrite(path, data)
 	return hashlib.sha256(data).hexdigest()

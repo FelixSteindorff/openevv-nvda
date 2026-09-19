@@ -7,28 +7,28 @@ import re
 from . import _openevv_dictionaries as dictionaries
 
 KINDS = {
-	"text": "Normaler Text",
-	"phonemes": "Lautfolge (ECI-Phoneme, fortgeschritten)",
-	"ordinal": "Ordnungszahl",
-	"telephone": "Telefonnummer",
-	"currency": "Geldbetrag",
-	"date_dmy": "Datum: Tag/Monat/Jahr",
-	"date_mdy": "Datum: Monat/Tag/Jahr",
-	"date_ymd": "Datum: Jahr/Monat/Tag",
+	"text": "Plain text",
+	"phonemes": "Phoneme sequence (ECI phonemes, advanced)",
+	"ordinal": "Ordinal",
+	"telephone": "Telephone number",
+	"currency": "Currency amount",
+	"date_dmy": "Date: day/month/year",
+	"date_mdy": "Date: month/day/year",
+	"date_ymd": "Date: year/month/day",
 }
 
 
 def annotation(text, kind, language):
 	text = text.strip()
 	if not text or len(text) > 500 or any(ord(c) < 32 for c in text):
-		raise ValueError("Bitte 1 bis 500 Zeichen ohne Zeilenumbrüche eingeben.")
+		raise ValueError("Enter 1 to 500 characters without line breaks.")
 	if kind == "text":
 		return text.replace("`", " ")
 	if language not in dictionaries.PREFIXES:
-		raise ValueError("Diese Aussprachehilfe ist nur für die acht westlichen Sprachvarianten freigegeben.")
+		raise ValueError("This pronunciation tool supports only the eight Western language variants.")
 	if kind == "phonemes":
 		if not re.fullmatch(r"[A-Za-z0-9 .,:;?!'~^=+*/_#%()<>|@&$-]+", text):
-			raise ValueError("ECI-Lautfolge ohne Backticks oder eckige Klammern eingeben.")
+			raise ValueError("Enter ECI phonemes without backquotes or square brackets.")
 		return "`[" + text + "]"
 	if kind == "ordinal":
 		valid, tag = re.fullmatch(r"[0-9]{1,12}", text), "ord"
@@ -55,9 +55,9 @@ def annotation(text, kind, language):
 				# route; never infer the order of an unlabelled date.
 				tag, text = "dateymd", "%04d/%02d/%02d" % (y,m,d)
 	else:
-		raise ValueError("Unbekannte Aussprachehilfe.")
+		raise ValueError("Unknown pronunciation tool.")
 	if not valid:
-		raise ValueError("Die Eingabe passt nicht zum gewählten Format.")
+		raise ValueError("The input does not match the selected format.")
 	return "`" + tag + "[" + text + "]"
 
 
@@ -72,7 +72,7 @@ def phonemeBody(output):
 			chars.append(char)
 	blocks = re.findall(r"`\[([^\]]+)\]", "".join(chars))
 	if not blocks:
-		raise ValueError("Die Engine hat keine verwendbare ECI-Lautfolge geliefert.")
+		raise ValueError("The engine did not return a usable ECI phoneme sequence.")
 	return " ".join(blocks)
 
 
@@ -88,7 +88,7 @@ def wpmChoice(driver, wanted):
 		if not math.isfinite(wanted):
 			raise ValueError()
 	except (TypeError, ValueError):
-		raise ValueError("Eine gültige Geschwindigkeit eingeben.")
+		raise ValueError("Enter a valid speech rate.")
 	choices = []
 	for boost in (False, True):
 		for percent in range(101):
@@ -110,17 +110,17 @@ def readPresets():
 	if not path.exists():
 		return {}
 	if path.stat().st_size > 1024 * 1024:
-		raise ValueError("Die Preset-Datei ist zu groß.")
+		raise ValueError("The preset file is too large.")
 	data = json.loads(path.read_text(encoding="utf-8"))
 	if not isinstance(data, dict) or any(not isinstance(k, str) or not isinstance(v, dict) for k, v in data.items()):
-		raise ValueError("Ungültige Preset-Datei; sie wurde nicht verändert.")
+		raise ValueError("Invalid preset file; it has not been changed.")
 	return data
 
 
 def savePreset(name, driver):
 	name = name.strip()
 	if not name or len(name) > 80 or any(ord(c) < 32 for c in name):
-		raise ValueError("Einen Namen mit 1 bis 80 Zeichen eingeben.")
+		raise ValueError("Enter a name with 1 to 80 characters.")
 	data = readPresets()
 	data[name] = snapshot(driver)
 	_writePresets(data)
@@ -136,7 +136,7 @@ def _writePresets(data):
 	dictionaries.ensureWritable()
 	raw = json.dumps(data, ensure_ascii=False, indent=2).encode("utf-8")
 	if len(raw) > 1024 * 1024:
-		raise ValueError("Zu viele Presets; die bisherigen bleiben erhalten.")
+		raise ValueError("Too many presets; existing presets have been preserved.")
 	dictionaries.atomicWrite(dictionaries.root() / "voice-presets.json", raw)
 
 

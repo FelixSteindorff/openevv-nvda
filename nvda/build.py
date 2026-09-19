@@ -208,7 +208,6 @@ def main():
         for leaf in ("openevv.py", "_openevv.py", "_openevv_dictionaries.py", "_openevv_tools.py"):
             z.write(os.path.join(ADDON, "synthDrivers", leaf), "synthDrivers/" + leaf)
         z.write(os.path.join(ADDON, "globalPlugins", "openevvSettings.py"), "globalPlugins/openevvSettings.py")
-        z.write(os.path.join(ADDON, "doc", "de", "readme.html"), "doc/de/readme.html")
         z.write(os.path.join(ADDON, "doc", "en", "readme.html"), "doc/en/readme.html")
         for path, name in have:
             z.write(path, ENGINE_DIR + "/" + name)
