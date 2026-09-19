@@ -1,0 +1,10 @@
+name = openevv
+summary = "Eloquence (openevv)"
+description = """OpenEVV driver for 64-bit NVDA with separate language and voice selection, Classic 11 kHz default, pronunciation tools and Unicode corrections. A compatible, separately supplied OpenEVV engine is required at build time."""
+author = "Felix Steindorff; based on work by Stanislaw Przedzinkowski"
+url = https://github.com/FelixSteindorff/openevv-nvda
+version = @VERSION@
+minimumNVDAVersion = 2026.1.0
+lastTestedNVDAVersion = @TESTED@
+updateChannel = None
+docFileName = readme.html
