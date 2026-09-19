@@ -1,7 +1,9 @@
 # Changelog
 
-## Unreleased
+## 0.1.1 - bundled test release
 
+- Publish a ready-to-install x64 test add-on as a GitHub Release, with ten language variants and explicit disclosure of unresolved IBM data redistribution rights.
+- Include engine provenance, preserved upstream notices and a SHA-256 checksum.
 - Translate project documentation, add-on dialogs, language labels, status messages and errors into English.
 - Use the English user guide for all interface languages; preserve multilingual pronunciation and Unicode test inputs.
 

@@ -2,7 +2,9 @@
 
 The driver, build and test sources in this repository are based on the NVDA directory of [Mudb0y/openevv](https://github.com/Mudb0y/openevv), copyright 2026 Stanislaw Przedzinkowski, licensed under MIT. This extended variant is maintained by Felix Steindorff. The original copyright and license notices are preserved in `LICENSE`.
 
-This repository contains **no OpenEVV engine DLL, reconstructed native engine sources, IBM language modules, synthesis tables or IBM SDK**. This repository's MIT license grants no rights to those components.
+The Git source tree contains no engine DLL, native engine sources, IBM language modules, synthesis tables or IBM SDK. **The downloadable add-on attached to GitHub Releases does include a locally modified OpenEVV engine with embedded IBM-derived language data and synthesis tables.** See `ENGINE-NOTICE.txt` for its provenance, SHA-256 and preserved upstream notices. The complete modified engine source is not included in this driver repository.
+
+**Redistribution rights for the IBM-derived components remain unresolved. We have not established permission to publicly redistribute them.** Their inclusion in a downloadable package does not resolve this uncertainty, grant rights to those data or place them under this repository's MIT license. This disclosure is not a substitute for permission from the relevant rights holders.
 
 The original OpenEVV project distinguishes its own work from language data and tables originating from IBM Embedded ViaVoice: see the [upstream NOTICE](https://github.com/Mudb0y/openevv/blob/main/NOTICE). IBM language data does not become MIT-licensed merely because it appears in a GitHub repository or in a newly compiled DLL.
 

@@ -1,6 +1,6 @@
 name = openevv
 summary = "Eloquence (openevv)"
-description = """OpenEVV driver for 64-bit NVDA with separate language and voice selection, Classic 11 kHz default, pronunciation tools and Unicode corrections. A compatible, separately supplied OpenEVV engine is required at build time."""
+description = """OpenEVV driver for 64-bit NVDA with separate language and voice selection, Classic 11 kHz default, pronunciation tools and Unicode corrections. The test package includes the x64 engine. Redistribution rights for its IBM-derived data remain unresolved; see NOTICE.md and ENGINE-NOTICE.txt."""
 author = "Felix Steindorff; based on work by Stanislaw Przedzinkowski"
 url = https://github.com/FelixSteindorff/openevv-nvda
 version = @VERSION@

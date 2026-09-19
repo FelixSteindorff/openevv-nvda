@@ -2,7 +2,15 @@
 
 An extended NVDA driver based on [Mudb0y/openevv](https://github.com/Mudb0y/openevv), maintained by Felix Steindorff. It focuses on reliable controls, classic Eloquence output, pronunciation tools and Unicode handling.
 
-**This repository contains only add-on source code, tests and documentation. It does not include an engine DLL, IBM language data or a ready-to-use speech package.** Redistribution rights for components originating from the IBM SDK remain unresolved. These components are not covered by this driver's MIT license. See [licensing scope](NOTICE.md).
+**A ready-to-install test add-on, including the x64 engine and IBM-derived language data, is available under GitHub Releases. Redistribution rights for those data remain unresolved; we have not established permission to publicly redistribute them.** Publishing the package does not resolve that uncertainty. The driver's MIT license does not cover these data. Read [licensing scope](NOTICE.md) and the [engine notice](ENGINE-NOTICE.txt).
+
+## Download and install
+
+Download [openevv-0.1.1.nvda-addon](https://github.com/FelixSteindorff/openevv-nvda/releases/download/v0.1.1/openevv-0.1.1.nvda-addon) from the [0.1.1 test release](https://github.com/FelixSteindorff/openevv-nvda/releases/tag/v0.1.1). It includes the engine and all ten language variants listed below. No separate DLL or Python installation is needed to use it. Windows and 64-bit NVDA 2026.1 or later are required; testing used NVDA 2026.2.
+
+Open the downloaded file in NVDA, install it, then select OpenEVV as the synthesizer. Use **11 kHz (Classic)** for the recommended output. This is a test release with the limitations listed below. The release includes a SHA-256 checksum file.
+
+The Git source tree contains driver source, tests and documentation. Binary packages are attached to releases.
 
 ## Features
 
@@ -16,23 +24,23 @@ An extended NVDA driver based on [Mudb0y/openevv](https://github.com/Mudb0y/open
 - Handling of Unicode hyphens, layout characters and unsupported typographic variants, including consistent sentence splitting.
 - Support for NVDA's configuration copy for sign-in and secure screens; downloads and file management are disabled there.
 
-Local development was tested with a Windows x64 engine containing ten language variants: American and British English, German, Spanish (Spain and Latin America), French (France and Canada), Italian, and experimental Japanese and Polish. **The separately supplied DLL determines which languages are actually available.** Phoneme analysis and special pronunciation tools support the eight Western variants.
+Local development was tested with a Windows x64 engine containing ten language variants: American and British English, German, Spanish (Spain and Latin America), French (France and Canada), Italian, and experimental Japanese and Polish. The published test package includes this engine. For custom builds, the supplied DLL determines which languages are available. Phoneme analysis and special pronunciation tools support the eight Western variants.
 
-## Requirements and local build
+## Building from source
 
 - Windows and **64-bit NVDA**; tested with NVDA 2026.2.
 - Python 3.11 or later for building and testing.
 - A separately supplied, compatible **OpenEVV x64 `eci.dll`**, with appropriate usage rights. Other Eloquence builds are not automatically compatible. This repository does not download an engine or build IBM data.
 
 ```powershell
-python nvda/build.py --version 0.1.0 --dll C:/my-local-path/eci.dll
+python nvda/build.py --version 0.1.1 --dll C:/my-local-path/eci.dll --engine-notice ENGINE-NOTICE.txt
 ```
 
-The build checks the architecture and required ECI exports, then creates `build/openevv-0.1.0.nvda-addon`. Passing the export check does not establish full compatibility; tests with the real DLL are still required. The supplied engine is included in the local package. **This does not grant additional rights to redistribute the resulting package.** Additional engine provenance or license notices can be included with `--engine-notice PATH`.
+The build checks the architecture and required ECI exports, then creates `build/openevv-0.1.1.nvda-addon`. Passing the export check does not establish full compatibility; tests with the real DLL are still required. The supplied engine is included in the local package. **This does not grant additional rights to redistribute the resulting package.** The example includes `ENGINE-NOTICE.txt` for our tested engine. When supplying a different DLL, provide its corresponding provenance and license notices with `--engine-notice PATH`.
 
 Install the package in NVDA and select OpenEVV as the speech synthesizer. Save settings with **NVDA+Control+C** as needed. The package retains the internal name `openevv`, so it updates existing OpenEVV test installations rather than installing a second synthesizer.
 
-See the [user guide](nvda/addon/doc/en/readme.html) for detailed instructions. Its language descriptions refer to the locally tested engine configuration; the public repository does not include that engine. Documentation and add-on-specific interface text are in English. Multilingual pronunciation and Unicode test inputs intentionally retain their original languages.
+See the [user guide](nvda/addon/doc/en/readme.html) for detailed instructions. Its language descriptions refer to the engine included in the test release. Documentation and add-on-specific interface text are in English. Multilingual pronunciation and Unicode test inputs intentionally retain their original languages.
 
 ## Tests
 
@@ -45,7 +53,7 @@ python nvda/test/settings.py
 python tools/check_repository.py
 ```
 
-[TESTING.md](TESTING.md) describes additional tests using a compatible DLL supplied locally. These use simulated NVDA modules and captured PCM. They do not replace listening tests or interactive NVDA testing. Public CI runs do not download an engine or publish binary packages.
+[TESTING.md](TESTING.md) describes additional tests using a compatible DLL supplied locally. These use simulated NVDA modules and captured PCM. They do not replace listening tests or interactive NVDA testing. Public CI runs do not download an engine or publish binary packages. Release packages are built and tested locally, then uploaded separately.
 
 ## Known limitations
 
