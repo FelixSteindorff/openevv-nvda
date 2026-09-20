@@ -6,7 +6,7 @@ An extended NVDA driver based on [Mudb0y/openevv](https://github.com/Mudb0y/open
 
 ## Download and install
 
-Download [openevv-0.1.2.nvda-addon](https://github.com/FelixSteindorff/openevv-nvda/releases/download/v0.1.2/openevv-0.1.2.nvda-addon) from the [0.1.2 test release](https://github.com/FelixSteindorff/openevv-nvda/releases/tag/v0.1.2). It includes the engine and all ten language variants listed below. No separate DLL or Python installation is needed to use it. Windows and 64-bit NVDA 2026.1 or later are required; testing used NVDA 2026.2.
+Download [openevv-0.1.3.nvda-addon](https://github.com/FelixSteindorff/openevv-nvda/releases/download/v0.1.3/openevv-0.1.3.nvda-addon) from the [0.1.3 test release](https://github.com/FelixSteindorff/openevv-nvda/releases/tag/v0.1.3). It includes the engine and all ten language variants listed below. No separate DLL or Python installation is needed to use it. Windows and 64-bit NVDA 2026.1 or later are required; testing used NVDA 2026.2.
 
 Open the downloaded file in NVDA, install it, then select OpenEVV as the synthesizer. Use **11 kHz (Classic)** for the recommended output. This is a test release with the limitations listed below. The release includes a SHA-256 checksum file.
 
@@ -21,6 +21,7 @@ The Git source tree contains driver source, tests and documentation. Binary pack
 - Rate, pitch, pitch range, volume, rate boost, head size, roughness and breathiness controls.
 - Optional pronunciation dictionaries with an editor, preview and custom corrections layered over Community or Alternative files.
 - Named voice presets, WPM input, phoneme analysis and number previews.
+- Normalize spacing around parentheses and before colons in ordinary Western-language speech so that retained punctuation supplies prosody instead of extra symbol names. Explicit spelling and raw voice-tag mode are preserved.
 - Handling of Unicode hyphens, layout characters and unsupported typographic variants, including consistent sentence splitting. Unsupported Latin letters with canonical accent decompositions use an encodable approximation in Western voices (for example, Petr Čech becomes Petr Cech), instead of a question mark. Supported accents are preserved; this is not a guarantee of native-language pronunciation.
 - Support for NVDA's configuration copy for sign-in and secure screens; downloads and file management are disabled there.
 
@@ -33,10 +34,10 @@ Local development was tested with a Windows x64 engine containing ten language v
 - A separately supplied, compatible **OpenEVV x64 `eci.dll`**, with appropriate usage rights. Other Eloquence builds are not automatically compatible. This repository does not download an engine or build IBM data.
 
 ```powershell
-python nvda/build.py --version 0.1.2 --dll C:/my-local-path/eci.dll --engine-notice ENGINE-NOTICE.txt
+python nvda/build.py --version 0.1.3 --dll C:/my-local-path/eci.dll --engine-notice ENGINE-NOTICE.txt
 ```
 
-The build checks the architecture and required ECI exports, then creates `build/openevv-0.1.2.nvda-addon`. Passing the export check does not establish full compatibility; tests with the real DLL are still required. The supplied engine is included in the local package. **This does not grant additional rights to redistribute the resulting package.** The example includes `ENGINE-NOTICE.txt` for our tested engine. When supplying a different DLL, provide its corresponding provenance and license notices with `--engine-notice PATH`.
+The build checks the architecture and required ECI exports, then creates `build/openevv-0.1.3.nvda-addon`. Passing the export check does not establish full compatibility; tests with the real DLL are still required. The supplied engine is included in the local package. **This does not grant additional rights to redistribute the resulting package.** The example includes `ENGINE-NOTICE.txt` for our tested engine. When supplying a different DLL, provide its corresponding provenance and license notices with `--engine-notice PATH`.
 
 Install the package in NVDA and select OpenEVV as the speech synthesizer. Save settings with **NVDA+Control+C** as needed. The package retains the internal name `openevv`, so it updates existing OpenEVV test installations rather than installing a second synthesizer.
 
@@ -50,6 +51,7 @@ Without an engine DLL, including in GitHub Actions:
 python nvda/test/sequence.py
 python nvda/test/engine.py
 python nvda/test/settings.py
+python nvda/test/punctuation.py
 python tools/check_repository.py
 ```
 

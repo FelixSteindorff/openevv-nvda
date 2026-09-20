@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.3 - Spaced punctuation fix
+
+- Prevent Western ECI from adding symbol names for spaced punctuation in ordinary speech: `( text )` becomes `(text)` and `Text : next` becomes `Text: next`. The punctuation itself remains available for prosody.
+- Join adjacent text fragments before normalization without moving or removing speech commands.
+- Preserve explicit character mode, spoken symbol names supplied by NVDA, timestamps, URLs, line breaks and raw voice-tag mode. No NVDA symbol settings are changed.
+- Add standalone regressions and 24 real-DLL comparisons across the eight Western language variants. Japanese and Polish processing is unchanged.
+
 ## 0.1.2 - Latin name character fix
 
 - Prevent unsupported, canonically decomposable Latin letters such as `Č` from becoming question marks in Windows-1252 voices. `Petr Čech` is passed to those voices as `Petr Cech`.

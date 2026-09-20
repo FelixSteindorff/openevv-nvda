@@ -19,3 +19,4 @@ jobs:
       - run: python nvda/test/sequence.py
       - run: python nvda/test/engine.py
       - run: python nvda/test/settings.py
+      - run: python nvda/test/punctuation.py

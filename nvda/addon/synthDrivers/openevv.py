@@ -106,6 +106,28 @@ PIECE_CAP = 500
 #: inside a word and no annotation is separated from what it applies to.
 _BOUNDARY = re.compile(r"(\s+)")
 
+# NVDA retains raw punctuation for prosody even when its spoken replacement
+# is disabled. Western ECI instead names parentheses/colons separated from
+# their text. Attach only the affected marks; keep the marks and line breaks.
+_OPEN_PAREN_SPACE = re.compile(r"\([^\S\r\n]+(?=\S)")
+_CLOSE_PAREN_SPACE = re.compile(r"(?<=\S)[^\S\r\n]+\)")
+_COLON_SPACE = re.compile(r"(?<=\S)[^\S\r\n]+:(?=\s|$)")
+
+
+def _joinAdjacentText(items):
+	"""Text fragments share context; speech commands remain boundaries."""
+	parts = []
+	for item in items:
+		if isinstance(item, str):
+			parts.append(item)
+		else:
+			if parts:
+				yield "".join(parts)
+				parts.clear()
+			yield item
+	if parts:
+		yield "".join(parts)
+
 #: Closing marks which may follow sentence-final punctuation.
 _CLOSERS = "\"')]}\N{RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK}\N{RIGHT DOUBLE QUOTATION MARK}\N{RIGHT SINGLE QUOTATION MARK}"
 
@@ -264,9 +286,9 @@ class SynthDriver(SynthDriver):
 			# queue item just as for a command whose state is visibly open.
 			return not spelling and not prosody and not self._voiceTags
 
-		for item in speechSequence:
+		for item in _joinAdjacentText(speechSequence):
 			if isinstance(item, str):
-				said = self._processText(item, speaking)
+				said = self._processText(item, speaking, spelling=spelling)
 				words = words or said.strip() != ""
 				# Sentence ends are free boundaries because the engine already pauses
 				# there. Whitespace after the much larger cap bounds a sentence which
@@ -359,10 +381,16 @@ class SynthDriver(SynthDriver):
 			# the default even without a trailing LangChangeCommand(None).
 			engine.control([(engine.selectLanguage, (self._language, self._presetNow()))])
 
-	def _processText(self, text, language=None):
+	def _processText(self, text, language=None, *, spelling=False):
 		# Normalize before choosing sentence boundaries so typographic variants
 		# get the same pauses as their ordinary spelling. Filter tags afterwards.
 		text = _openevv.normalizeText(text, self._language if language is None else language)
+		if not spelling and not self._voiceTags and _openevv.encodingOf(
+			self._language if language is None else language
+		) == "cp1252":
+			text = _OPEN_PAREN_SPACE.sub("(", text)
+			text = _CLOSE_PAREN_SPACE.sub(")", text)
+			text = _COLON_SPACE.sub(":", text)
 		# Native Japanese crashes on some raw backquote forms (including `0
 		# and an escaped literal backquote). Keep raw text tags disabled for
 		# Japanese, including temporary switches; NVDA commands are separate.
