@@ -34,11 +34,14 @@ WESTERN = [
     ('ligatures', '\ufb00 \ufb01 \ufb02 \ufb03 \ufb04 \ufb05 \ufb06', 'ff fi fl ffi ffl st st'),
     ('capital-sharp-s', 'GRO\u1e9e', 'GROSS'),
     ('width', '\uff21\uff22\uff23\uff11\uff12\uff13\uff0c\uff01', 'ABC123,!'),
+    ('latin-names', 'Petr \u010cech. \u0106ori\u0107. Dvo\u0159\u00e1k. \u021aicu. \u01d8',
+     'Petr Cech. Coric. Dvor\u00e1k. Ticu. \u00fc'),
+    ('decomposed-name', 'Petr C\u030cech', 'Petr Cech'),
 ]
 PRESERVED = '\u00e4\u00f6\u00fc\u00c4\u00d6\u00dc\u00df \u2018\u2019\u201a\u201c\u201d\u201e \u2013\u2014 \u2026\u20ac\u00a3\u00a9\u00ae\u2122 \u00b2\u00b3\u00bc\u00bd\u00be ?'
 # These are meaningful, not typographic equivalents of ASCII. Keep the
 # existing encoding outcome and document the remaining legacy limitation.
-UNHANDLED = '\u2212\u2032\u2033\u2192\u2264\U0001f600\u010d\u0142\u03b1\u0416\u200c\u200d\uff40'
+UNHANDLED = '\u2212\u2032\u2033\u2192\u2264\U0001f600\u0142\u03b1\u0416\u200c\u200d\uff40'
 
 
 def modules(addon):
@@ -93,7 +96,7 @@ def check_sequences(e, driver):
     e.Engine = sequence.FakeEngine
     try:
         d = driver.SynthDriver()
-        for group in ('layout', 'typography'):
+        for group in ('layout', 'typography', 'latin_names'):
             assert sequence.spoken(d, [case_text(group, 'input')]) == sequence.spoken(d, [case_text(group, 'reference')]), group
         # Formatting controls cannot hide an ECI tag from the ordinary-text filter.
         assert all(b'`' not in call[1] for call in sequence.spoken(d, ['\ufeff`v1Hello']) if call[0] == 'addText')
@@ -104,6 +107,8 @@ def check_sequences(e, driver):
 
 
 def case_text(group, variant):
+    if group == 'latin_names':
+        return {'input': 'Petr \u010cech.', 'reference': 'Petr Cech.', 'legacy': 'Petr ?ech.'}[variant]
     cases = LAYOUT if group == 'layout' else WESTERN
     return '. '.join(row[1 if variant == 'input' else 2] for row in cases) + '.'
 
@@ -144,9 +149,9 @@ def main():
     check_sequences(e, driver)
     results = []
     for locale in LANGUAGES:
-        for group in ('layout', 'typography') if locale not in ('ja_JP', 'pl_PL') else ('layout',):
+        for group in ('layout', 'typography', 'latin_names') if locale not in ('ja_JP', 'pl_PL') else ('layout',):
             audio = []
-            for variant in ('input', 'reference'):
+            for variant in ('input', 'reference', 'legacy') if group == 'latin_names' else ('input', 'reference'):
                 r = subprocess.run([sys.executable, __file__, '--addon', str(a.addon),
                                     '--out', str(a.out), '--child', locale, group, variant],
                                    capture_output=True, timeout=45)
@@ -154,6 +159,8 @@ def main():
                 with wave.open(str(a.out / f'{locale}-{group}-{variant}.wav'), 'rb') as w:
                     audio.append(w.readframes(w.getnframes()))
             assert audio[0] == audio[1], (locale, group)
+            if group == 'latin_names':
+                assert audio[0] != audio[2], (locale, 'name still sounds like the old question-mark input')
             results.append(dict(language=locale, group=group, pcm_equal=True,
                                 samples=len(audio[0])//2, sha256=hashlib.sha256(audio[0]).hexdigest()))
             print('PASS:', locale, group, 'matches reference PCM', flush=True)

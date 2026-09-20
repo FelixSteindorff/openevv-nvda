@@ -46,3 +46,9 @@ The final packaged add-on was extracted and tested locally before upload:
 - `unicode_text.py`: 170 layout and typography fixtures, sentence boundaries, and 18 reference PCM comparisons.
 
 All checks passed. These are automated tests using the real DLL and simulated NVDA modules. This packaging update was not retested interactively in NVDA or at Windows sign-in. The known limitations in README.md still apply.
+
+## Release 0.1.2 verification
+
+The packaged real DLL passed `windows.py`, `settings.py --dll`, `features.py --dll` and `unicode_text.py --addon`; the standalone sequence and engine tests also passed. Unicode coverage now includes 186 layout/typography/name fixtures and 26 reference PCM comparisons. In all eight Windows-1252 language variants, `Petr Čech` produces the same PCM as `Petr Cech` and different PCM from the former `Petr ?ech` input. Composed/decomposed spellings, supported accents and the unchanged Japanese/Polish encoding paths are checked as well.
+
+These checks establish the character fallback, not native Czech pronunciation. No new interactive listening or Windows sign-in test was performed for this change. The engine binary is unchanged from 0.1.1.

@@ -223,6 +223,25 @@ _TEXT_FALLBACKS = {
 _TEXT_FALLBACKS.update({chr(n): chr(n - 0xfee0) for n in range(0xff01, 0xff5f) if n != 0xff40})
 
 
+def _latinFallback(ch):
+	"""Approximate an unsupported Latin letter, retaining encodable accents."""
+	if not unicodedata.name(ch, "").startswith("LATIN ") or not ch.isalpha():
+		return None
+	decomposed = unicodedata.normalize("NFD", ch)
+	if len(decomposed) < 2 or not all(unicodedata.combining(c) for c in decomposed[1:]):
+		return None
+	# Remove only as many trailing accents as necessary. For example, keep
+	# the diaeresis of u-diaeresis-caron, rather than reducing it to plain u.
+	for end in range(len(decomposed) - 1, 0, -1):
+		candidate = unicodedata.normalize("NFC", decomposed[:end])
+		try:
+			candidate.encode("cp1252")
+		except UnicodeEncodeError:
+			continue
+		return candidate
+	return None
+
+
 def normalizeText(text, language):
 	encoding = encodingOf(language)
 	if not text.isascii():
@@ -240,6 +259,8 @@ def normalizeText(text, language):
 					ch = " "
 				else:
 					fallback = _TEXT_FALLBACKS.get(ch)
+					if fallback is None and encoding == "cp1252":
+						fallback = _latinFallback(ch)
 					if fallback is not None and b"?" not in fallback.encode(encoding, "replace"):
 						ch = fallback
 			parts.append(ch)

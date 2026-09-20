@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.2 - Latin name character fix
+
+- Prevent unsupported, canonically decomposable Latin letters such as `Č` from becoming question marks in Windows-1252 voices. `Petr Čech` is passed to those voices as `Petr Cech`.
+- Preserve directly supported letters and as many encodable accents as possible. Composed and decomposed spellings behave consistently. Japanese and Polish encoding paths are unchanged.
+- Add regression coverage for names and real-DLL PCM comparisons against both the intended fallback and the previous question-mark output. This provides approximate spelling, not Czech pronunciation support.
+
 ## 0.1.1 - bundled test release
 
 - Publish a ready-to-install x64 test add-on as a GitHub Release, with ten language variants and explicit disclosure of unresolved IBM data redistribution rights.

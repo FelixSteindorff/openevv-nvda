@@ -12,6 +12,7 @@ from pathlib import Path
 import sys
 import threading
 import time
+import unicodedata
 
 import sequence
 
@@ -66,12 +67,22 @@ def simulated():
                 assert not any(bad in name for bad in ("Ã", "Â", "\ufffd"))
         assert d.availableLanguages["de_DE"].displayName == "German"
         assert d.availableLanguages["fr_FR"].displayName == "French"
+        # Unrepresentable Latin accents in names must not become spoken '?'.
+        for language in e.LOCALES:
+            codec = e.encodingOf(language)
+            for source_text, fallback in (("Petr \u010cech", "Petr Cech"),
+                                       ("Petr C\u030cech", "Petr Cech"),
+                                       ("\u0106ori\u0107", "Coric"),
+                                       ("\u01d8", "\u00fc")):
+                expected = fallback if codec == "cp1252" else unicodedata.normalize("NFC", source_text)
+                assert e.encodeText(source_text, language) == expected.encode(codec, "replace")
+            native = "\u00e4\u00e9\u0160\u017d?"
+            assert e.encodeText(native, language) == native.encode(codec, "replace")
         umlauts = "äöüÄÖÜß"
         assert e.encodeText(umlauts, 0x40000) == b"\xe4\xf6\xfc\xc4\xd6\xdc\xdf"
         assert e.decodeName(umlauts.encode("cp1252"), 0x40000) == umlauts
         assert e.decodeName("日本語".encode("cp932"), 0x80000) == "日本語"
         assert e.decodeName("Głos".encode("utf-8"), 0x110000) == "Głos"
-        import unicodedata
         assert e.encodeText(unicodedata.normalize("NFD", umlauts), 0x40000) == e.encodeText(umlauts, 0x40000)
         assert e.encodeText("cafe\u0301", 0x10000) == b"caf\xe9"
         assert e.encodeText("12\u202fkm", 0x40000) == b"12 km"
@@ -193,7 +204,6 @@ def real_dll(path, e, driver, out):
                             old_utf8_sha256=hashlib.sha256(broken).hexdigest(),
                             equals_cp1252=True))
     (out / "unicode-dll.json").write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding="utf-8")
-    import unicodedata
     normalization = []
     for native, equivalent in (("äöüÄÖÜß", unicodedata.normalize("NFD", "äöüÄÖÜß")),
                                ("café", "cafe\u0301"), ("12 km", "12\u202fkm")):
