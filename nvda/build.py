@@ -203,12 +203,16 @@ def main():
         z.writestr("manifest.ini", manifest)
         z.write(os.path.join(ROOT, "LICENSE"), "LICENSE")
         z.write(os.path.join(ROOT, "NOTICE.md"), "NOTICE.md")
+        z.write(os.path.join(ROOT, "UNICODE-LICENSE.txt"), "UNICODE-LICENSE.txt")
         if args.engine_notice:
             z.write(args.engine_notice, "ENGINE-NOTICE.txt")
         for leaf in ("openevv.py", "_openevv.py", "_openevv_dictionaries.py", "_openevv_tools.py"):
             z.write(os.path.join(ADDON, "synthDrivers", leaf), "synthDrivers/" + leaf)
         z.write(os.path.join(ADDON, "globalPlugins", "openevvSettings.py"), "globalPlugins/openevvSettings.py")
         z.write(os.path.join(ADDON, "doc", "en", "readme.html"), "doc/en/readme.html")
+        for language in ("en", "de"):
+            relative = "locale/%s/symbols-openevv.dic" % language
+            z.write(os.path.join(ADDON, relative), relative)
         for path, name in have:
             z.write(path, ENGINE_DIR + "/" + name)
 

@@ -6,7 +6,7 @@ An extended NVDA driver based on [Mudb0y/openevv](https://github.com/Mudb0y/open
 
 ## Download and install
 
-Download [openevv-0.1.3.nvda-addon](https://github.com/FelixSteindorff/openevv-nvda/releases/download/v0.1.3/openevv-0.1.3.nvda-addon) from the [0.1.3 test release](https://github.com/FelixSteindorff/openevv-nvda/releases/tag/v0.1.3). It includes the engine and all ten language variants listed below. No separate DLL or Python installation is needed to use it. Windows and 64-bit NVDA 2026.1 or later are required; testing used NVDA 2026.2.
+Download [openevv-0.1.4.nvda-addon](https://github.com/FelixSteindorff/openevv-nvda/releases/download/v0.1.4/openevv-0.1.4.nvda-addon) from the [0.1.4 test release](https://github.com/FelixSteindorff/openevv-nvda/releases/tag/v0.1.4). It includes the engine and all ten language variants listed below. No separate DLL or Python installation is needed to use it. Windows and 64-bit NVDA 2026.1 or later are required; testing used NVDA 2026.2.
 
 Open the downloaded file in NVDA, install it, then select OpenEVV as the synthesizer. Use **11 kHz (Classic)** for the recommended output. This is a test release with the limitations listed below. The release includes a SHA-256 checksum file.
 
@@ -14,6 +14,7 @@ The Git source tree contains driver source, tests and documentation. Binary pack
 
 ## Features
 
+- Native NVDA symbol pronunciation, including its language, verbosity and user overrides. Supplementary German/English labels cover all 128 Unicode box-drawing characters; other locales fall back to English for these added labels.
 - Separate language and voice selectors; available languages are discovered from the engine.
 - Eight classic voices with stable IDs: Reed, Shelley, Sandy, Rocko, Glen, FastFlo, Grandma, Grandpa.
 - Persistent settings; automatic language changes preserve the voice and return to the default language.
@@ -34,10 +35,10 @@ Local development was tested with a Windows x64 engine containing ten language v
 - A separately supplied, compatible **OpenEVV x64 `eci.dll`**, with appropriate usage rights. Other Eloquence builds are not automatically compatible. This repository does not download an engine or build IBM data.
 
 ```powershell
-python nvda/build.py --version 0.1.3 --dll C:/my-local-path/eci.dll --engine-notice ENGINE-NOTICE.txt
+python nvda/build.py --version 0.1.4 --dll C:/my-local-path/eci.dll --engine-notice ENGINE-NOTICE.txt
 ```
 
-The build checks the architecture and required ECI exports, then creates `build/openevv-0.1.3.nvda-addon`. Passing the export check does not establish full compatibility; tests with the real DLL are still required. The supplied engine is included in the local package. **This does not grant additional rights to redistribute the resulting package.** The example includes `ENGINE-NOTICE.txt` for our tested engine. When supplying a different DLL, provide its corresponding provenance and license notices with `--engine-notice PATH`.
+The build checks the architecture and required ECI exports, then creates `build/openevv-0.1.4.nvda-addon`. Passing the export check does not establish full compatibility; tests with the real DLL are still required. The supplied engine is included in the local package. **This does not grant additional rights to redistribute the resulting package.** The example includes `ENGINE-NOTICE.txt` for our tested engine. When supplying a different DLL, provide its corresponding provenance and license notices with `--engine-notice PATH`.
 
 Install the package in NVDA and select OpenEVV as the speech synthesizer. Save settings with **NVDA+Control+C** as needed. The package retains the internal name `openevv`, so it updates existing OpenEVV test installations rather than installing a second synthesizer.
 
@@ -52,10 +53,26 @@ python nvda/test/sequence.py
 python nvda/test/engine.py
 python nvda/test/settings.py
 python nvda/test/punctuation.py
+python nvda/test/symbols.py
 python tools/check_repository.py
 ```
 
-[TESTING.md](TESTING.md) describes additional tests using a compatible DLL supplied locally. These use simulated NVDA modules and captured PCM. They do not replace listening tests or interactive NVDA testing. Public CI runs do not download an engine or publish binary packages. Release packages are built and tested locally, then uploaded separately.
+[TESTING.md](TESTING.md) describes additional tests using a compatible DLL supplied locally, including simulated NVDA modules, captured PCM, and symbol integration with actual portable NVDA on an isolated desktop. These do not replace listening tests or interactive NVDA testing. Public CI runs do not download an engine or publish binary packages. Release packages are built and tested locally, then uploaded separately.
+
+## Symbol pronunciation
+
+NVDA processes known symbols using its own dictionaries, enabled CLDR data, selected language, verbosity and personal overrides before text reaches OpenEVV. The driver does not run a second symbol-name conversion or force all symbols to be spoken.
+
+This add-on registers a supplementary NVDA dictionary for U+2500-U+257F, the 128 box-drawing symbols commonly used in terminal diagrams. For example, `┐` is "top right corner" in English and "Rahmenecke oben rechts" in German. These additions are active automatically:
+
+- **None, Some, Most:** the added box-drawing symbols are silent.
+- **All:** NVDA speaks their names; repeated characters use NVDA's normal repetition handling.
+- **Character navigation:** NVDA can identify each added symbol even when general verbosity is None.
+- Existing symbols such as `→`, punctuation, mathematical signs and emoji retain NVDA's own definitions and levels. For example, the arrow is normally announced starting at Some.
+
+Customize entries in NVDA's Punctuation/Symbol Pronunciation dialog. Your entries take precedence. Additional languages use NVDA's normal English fallback for these new box labels; existing symbols keep their normal localized names. Because this uses NVDA's symbol-dictionary extension mechanism, the supplementary labels are available to all synthesizers while the add-on is enabled. No personal NVDA configuration is rewritten. Restart NVDA after installing the update.
+
+The supplementary table is not a catalogue of every Unicode character. Characters unknown to NVDA and unsupported by the selected engine can still require a user-defined symbol entry. Calling the engine directly bypasses NVDA's symbol processing.
 
 ## Known limitations
 

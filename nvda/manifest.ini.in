@@ -8,3 +8,8 @@ minimumNVDAVersion = 2026.1.0
 lastTestedNVDAVersion = @TESTED@
 updateChannel = None
 docFileName = readme.html
+
+[symbolDictionaries]
+    [[openevv]]
+        displayName = "OpenEVV box-drawing symbols"
+        mandatory = True

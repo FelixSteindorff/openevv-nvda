@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.4 - NVDA symbol dictionary integration
+
+- Register a native NVDA symbol dictionary with German and English names for all 128 Unicode box-drawing characters. Existing NVDA and CLDR symbol names are reused without a second driver-side conversion.
+- Respect NVDA verbosity, character navigation, automatic language changes and personal symbol overrides. Added box symbols are announced at All and during character navigation; lower levels suppress them.
+- Include Unicode data licensing and tests with actual NVDA 2026.2 on an isolated desktop. The supplementary definitions also apply to other synthesizers while this add-on is enabled.
+
 ## 0.1.3 - Spaced punctuation fix
 
 - Prevent Western ECI from adding symbol names for spaced punctuation in ordinary speech: `( text )` becomes `(text)` and `Text : next` becomes `Text: next`. The punctuation itself remains available for prosody.

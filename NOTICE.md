@@ -15,3 +15,5 @@ A local build using `--dll` includes the user-supplied library in the add-on. Us
 Optional additional dictionaries come from [AltIBMTTSDictionaries](https://github.com/mohamed00/AltIBMTTSDictionaries) and [IBMTTSDictionaries](https://github.com/eigencrow/IBMTTSDictionaries). They are downloaded separately only on request, are not part of this repository and retain their respective license terms. The driver's MIT license does not relicense those files.
 
 OpenEVV, IBM, ViaVoice, Eloquence and NVDA refer to their respective projects or products. This repository is an independent development and does not claim official endorsement by their providers.
+
+The supplementary box-drawing labels in `nvda/addon/locale/*/symbols-openevv.dic` derive from Unicode Character Database names exposed by Python, with project translations and shorter labels. Unicode-derived data is covered by Unicode License V3, preserved in `UNICODE-LICENSE.txt` and included in the package. These are NVDA symbol tables, not IBM pronunciation data. NVDA's existing symbol and CLDR dictionaries are used at runtime and are not copied into this repository.

@@ -14,6 +14,8 @@ __pycache__/
 *.wav
 *.pcm
 *.dic
+!/nvda/addon/locale/en/symbols-openevv.dic
+!/nvda/addon/locale/de/symbols-openevv.dic
 *.log
 .env
 .env.*
